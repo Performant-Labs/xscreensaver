@@ -80,6 +80,9 @@ struct wayland_dpms {
 typedef struct dpms_output {
   struct wl_list link;
 
+  uint32_t reg_name;
+  uint32_t reg_version;
+
   struct wl_output *wl_output;
   char *name;
   Bool wl_done;	/* wl_output: all info about this output has been sent */
@@ -195,6 +198,68 @@ kde_handle_done (void *data, struct org_kde_kwin_dpms *dpms)
 }
 
 
+/* Subscribe to one wl_output.  Called only after a power-management
+   protocol is known to exist, so Mutter (which has neither) never gets here.
+ */
+static void
+bind_output (wayland_dpms *state, struct wl_registry *reg, dpms_output *out)
+{
+  static const struct wl_output_listener wl_listener = {
+    .name        = wl_handle_name,
+    .geometry    = wl_handle_geometry,
+    .mode        = wl_handle_mode,
+    .scale       = wl_handle_scale,
+    .description = wl_handle_description,
+    .done        = wl_handle_done,
+  };
+  static const struct zwlr_output_power_v1_listener wlr_listener = {
+    .mode        = wlr_handle_mode,
+    .failed      = wlr_handle_failed,
+  };
+  static const struct org_kde_kwin_dpms_listener kde_listener = {
+    .supported   = kde_handle_supported,
+    .mode        = kde_handle_mode,
+    .done        = kde_handle_done,
+  };
+  uint32_t version = out->reg_version;
+
+  if (out->wl_output) return;
+
+  if (version > (uint32_t) wl_output_interface.version)
+    version = wl_output_interface.version;
+
+  /* First listener: properties of the wl_output object. */
+  out->wl_output = wl_registry_bind (reg, out->reg_name, &wl_output_interface,
+                                     version);
+  if (!out->wl_output) return;
+  wl_output_add_listener (out->wl_output, &wl_listener, out);
+
+  if (state->wlr_mgr)
+    {
+      /* Second listener: changes to its DPMS state. */
+      out->wlr_out =
+        zwlr_output_power_manager_v1_get_output_power (state->wlr_mgr,
+                                                       out->wl_output);
+      zwlr_output_power_v1_add_listener (out->wlr_out, &wlr_listener, out);
+    }
+  else if (state->kde_mgr)
+    {
+      /* Second listener: changes to its DPMS state. */
+      out->kde_out =
+        org_kde_kwin_dpms_manager_get (state->kde_mgr, out->wl_output);
+      org_kde_kwin_dpms_add_listener (out->kde_out, &kde_listener, out);
+    }
+}
+
+static void
+bind_unbound_outputs (wayland_dpms *state, struct wl_registry *reg)
+{
+  dpms_output *out;
+  wl_list_for_each (out, &state->outputs, link)
+    bind_output (state, reg, out);
+}
+
+
 /* This is an iterator for all of the extensions that Wayland provides,
    so we can find the ones we are interested in.
  */
@@ -206,25 +271,9 @@ handle_global (void *data, struct wl_registry *reg,
 
   if (!strcmp (iface, wl_output_interface.name))
     {
-      static const struct wl_output_listener wl_listener = {
-	.name        = wl_handle_name,
-	.geometry    = wl_handle_geometry,
-	.mode        = wl_handle_mode,
-	.scale       = wl_handle_scale,
-	.description = wl_handle_description,
-	.done        = wl_handle_done,
-      };
-      static const struct zwlr_output_power_v1_listener wlr_listener = {
-        .mode        = wlr_handle_mode,
-        .failed      = wlr_handle_failed,
-      };
-      static const struct org_kde_kwin_dpms_listener kde_listener = {
-        .supported   = kde_handle_supported,
-        .mode        = kde_handle_mode,
-        .done        = kde_handle_done,
-      };
-
       dpms_output *out = (dpms_output *) calloc (sizeof (*out), 1);
+      out->reg_name = name;
+      out->reg_version = version;
       out->wlr_mode = ZWLR_OUTPUT_POWER_V1_MODE_ON;
       out->kde_mode = ORG_KDE_KWIN_DPMS_MODE_ON;
       wl_list_insert (&state->outputs, &out->link);
@@ -232,26 +281,11 @@ handle_global (void *data, struct wl_registry *reg,
       if (verbose_p > 2)
         fprintf (stderr, "%s: wayland: dpms: found: %s\n", blurb(), iface);
 
-      /* First listener: properties of the wl_output object. */
-      out->wl_output = wl_registry_bind (reg, name, &wl_output_interface,
-                                         version);
-      wl_output_add_listener (out->wl_output, &wl_listener, out);
-
-      if (state->wlr_mgr)
-        {
-          /* Second listener: changes to its DPMS state. */
-          out->wlr_out =
-            zwlr_output_power_manager_v1_get_output_power (state->wlr_mgr,
-                                                           out->wl_output);
-          zwlr_output_power_v1_add_listener (out->wlr_out, &wlr_listener, out);
-        }
-      else if (state->kde_mgr)
-        {
-          /* Second listener: changes to its DPMS state. */
-          out->kde_out =
-            org_kde_kwin_dpms_manager_get (state->kde_mgr, out->wl_output);
-          org_kde_kwin_dpms_add_listener (out->kde_out, &kde_listener, out);
-        }
+      /* Do not bind wl_output until a power protocol exists.  Binding it
+         on Mutter and then dispatching the output events segfaults, and
+         without zwlr or KDE DPMS the output object is useless anyway. */
+      if (state->wlr_mgr || state->kde_mgr)
+        bind_output (state, reg, out);
     }
   else if (!strcmp (iface, zwlr_output_power_manager_v1_interface.name))
     {
@@ -260,6 +294,9 @@ handle_global (void *data, struct wl_registry *reg,
       state->wlr_mgr =
         wl_registry_bind (reg, name, &zwlr_output_power_manager_v1_interface,
                           version);
+      /* Outputs announced before the manager were only recorded. */
+      if (!state->kde_mgr)
+        bind_unbound_outputs (state, reg);
     }
   else if (!strcmp (iface, org_kde_kwin_dpms_manager_interface.name))
     {
@@ -268,6 +305,9 @@ handle_global (void *data, struct wl_registry *reg,
       state->kde_mgr =
         wl_registry_bind (reg, name, &org_kde_kwin_dpms_manager_interface,
                           version);
+      /* Prefer zwlr when both protocols exist; it is bound above. */
+      if (!state->wlr_mgr)
+        bind_unbound_outputs (state, reg);
     }
 }
 
@@ -295,24 +335,9 @@ wayland_dpms_init (wayland_dpy *dpy)
   state->reg = wl_display_get_registry (dpy->dpy);
   wl_registry_add_listener (state->reg, &listener, state);
 
-  /* Do the first round trip to load the wl_outputs. */
+  /* Do the first round trip to learn which protocols the compositor has.
+     wl_output is bound only when one of the power protocols showed up. */
   wayland_dpy_process_events (dpy, true);
-
-  /* Now do more round trips until we have all the info about them. FFS! */
-  while (1)
-    {
-      Bool all_done = True;
-      dpms_output *out;
-      wl_list_for_each (out, &state->outputs, link)
-        {
-          if (!out->wl_done)
-            all_done = False;
-          if (state->kde_mgr && !out->kde_done)
-            all_done = False;
-        }
-      if (all_done) break;
-      wayland_dpy_process_events (dpy, true);
-    }
 
   if (!state->wlr_mgr && !state->kde_mgr)
     {
@@ -325,6 +350,22 @@ wayland_dpms_init (wayland_dpy *dpy)
       return NULL;
     }
 
+  /* Now do more round trips until we have all the info about them. FFS! */
+  while (1)
+    {
+      Bool all_done = True;
+      dpms_output *out;
+      wl_list_for_each (out, &state->outputs, link)
+        {
+          if (out->wl_output && !out->wl_done)
+            all_done = False;
+          if (out->kde_out && !out->kde_done)
+            all_done = False;
+        }
+      if (all_done) break;
+      wayland_dpy_process_events (dpy, true);
+    }
+
   return state;
 }
 
@@ -333,6 +374,7 @@ void
 wayland_dpms_free (wayland_dpms *state)
 {
   dpms_output *out, *tmp;
+  if (!state) return;
   wl_list_for_each_safe (out, tmp, &state->outputs, link)
     {
       wl_list_remove (&out->link);

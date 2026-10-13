@@ -4461,8 +4461,9 @@ the_network_is_not_the_computer (gpointer data)
         {
           /* Connected but the necessary extensions are missing. */
           warning_dialog (s->window, _("Warning"),
-            _("Wayland error: idle detection is impossible. "
-              "The XScreenSaver daemon will not work.\n"));
+            _("This Wayland compositor does not implement an idle protocol. "
+              "XScreenSaver will use X11/XWayland activity detection. "
+              "Locking is not secure under Wayland.\n"));
         }
       else if (getenv ("WAYLAND_DISPLAY") || getenv ("WAYLAND_SOCKET"))
         {

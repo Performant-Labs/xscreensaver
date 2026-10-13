@@ -132,6 +132,7 @@ wayland_dpy_process_events (wayland_dpy *state, int sync_p)
 void
 wayland_dpy_close (wayland_dpy *state)
 {
+  if (!state) return;
   wayland_dpy_process_events (state, 0);
   wl_display_disconnect (state->dpy);
   if (state->event_loop)

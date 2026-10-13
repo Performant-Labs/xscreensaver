@@ -481,12 +481,22 @@ main_loop (saver_info *si, Bool init_p)
   si->wayland_dpy = wayland_dpy_connect();
   if (si->wayland_dpy)
     {
-      /* Process input on the Wayland socket. */
-      int fd = wayland_dpy_get_fd (si->wayland_dpy);
-      XtAppAddInput (si->app, fd,
-                     (XtPointer) (XtInputReadMask | XtInputExceptMask),
-                     wayland_dpy_cb, (XtPointer) si);
       si->wayland_dpms = wayland_dpms_init (si->wayland_dpy);
+      if (si->wayland_dpms)
+        {
+          /* Process input on the Wayland socket. */
+          int fd = wayland_dpy_get_fd (si->wayland_dpy);
+          XtAppAddInput (si->app, fd,
+                         (XtPointer) (XtInputReadMask | XtInputExceptMask),
+                         wayland_dpy_cb, (XtPointer) si);
+        }
+      else
+        {
+          /* No zwlr or KDE DPMS protocol.  Drop the connection so the
+             X11 DPMS path in dpms.c still runs under XWayland. */
+          wayland_dpy_close (si->wayland_dpy);
+          si->wayland_dpy = NULL;
+        }
     }
 # endif /* HAVE_WAYLAND */
 

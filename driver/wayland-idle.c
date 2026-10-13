@@ -10,8 +10,9 @@
  *
  * Detecting idleness via a connection to the Wayland server and the
  * "idle-notify-v1" protocol: https://wayland.app/protocols/ext-idle-notify-v1
- * If the Wayland server does not implement this protocol, XScreenSaver cannot
- * function.  KDE implements it, but GNOME does not.
+ * or KDE's "org_kde_kwin_idle".  If the compositor implements neither
+ * (Mutter / GNOME does not), this returns NULL and the caller continues
+ * with X11/XWayland activity detection.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -55,6 +56,18 @@ struct wayland_idle {
 };
 
 
+/* wl_seat emits these as soon as it is bound.  A missing listener is what
+   older libwayland builds turn into a segfault while dispatching. */
+static void
+seat_handle_capabilities (void *data, struct wl_seat *seat, uint32_t caps)
+{
+}
+
+static void
+seat_handle_name (void *data, struct wl_seat *seat, const char *name)
+{
+}
+
 /* This is an iterator for all of the extensions that Wayland provides,
    so we can find the ones we are interested in.
  */
@@ -66,9 +79,19 @@ handle_global (void *data, struct wl_registry *reg,
 
   if (!strcmp (iface, wl_seat_interface.name))
     {
+      static const struct wl_seat_listener seat_listener = {
+        .capabilities = seat_handle_capabilities,
+        .name         = seat_handle_name,
+      };
+      uint32_t v = version;
+      if (v > (uint32_t) wl_seat_interface.version)
+        v = wl_seat_interface.version;
+
       if (verbose_p > 2)
         fprintf (stderr, "%s: wayland: idle: found: %s\n", blurb(), iface);
-      state->seat = wl_registry_bind (reg, name, &wl_seat_interface, version);
+      state->seat = wl_registry_bind (reg, name, &wl_seat_interface, v);
+      if (state->seat)
+        wl_seat_add_listener (state->seat, &seat_listener, state);
     }
   else if (!strcmp (iface, ext_idle_notifier_v1_interface.name))
     {
@@ -239,6 +262,10 @@ wayland_idle_init (wayland_dpy *dpy,
                blurb(),
                ext_idle_notifier_v1_interface.name,
                org_kde_kwin_idle_interface.name);
+      /* Drain while the seat and registry listeners are still valid, then
+         drop them.  The caller must not keep dispatching on this connection
+         as if native idle detection were available. */
+      wayland_dpy_process_events (dpy, true);
       wayland_idle_free (state);
       return NULL;
     }
@@ -251,6 +278,8 @@ wayland_idle_init (wayland_dpy *dpy,
 void
 wayland_idle_free (wayland_idle *state)
 {
+  if (!state) return;
+
   if (state->seat)
     wl_seat_destroy (state->seat);
   if (state->ext_idle_notifier)

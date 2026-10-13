@@ -1550,10 +1550,18 @@ main_loop (Display *dpy)
     }
   else if (wdpy)
     {
-      /* Connected to Wayland, but no idle protocols available. */
-      fprintf (stderr, "%s: wayland: idle detection is impossible.\n",
+      /* Connected to Wayland, but Mutter and some other compositors
+         implement neither ext_idle_notifier_v1 nor org_kde_kwin_idle.
+         Drop the native idle connection and keep running on XWayland,
+         which is what 6.10 and earlier did.  Locking stays disabled
+         because X11 grabs are not secure under Wayland. */
+      fprintf (stderr,
+               "%s: wayland: idle protocols unavailable;"
+               " using X11/XWayland activity detection.\n",
                blurb());
-      exit (1);
+      wayland_dpy_close (wdpy);
+      wdpy = NULL;
+      wayland_p = True;
     }
   else if (getenv ("WAYLAND_DISPLAY") || getenv ("WAYLAND_SOCKET"))
     {
