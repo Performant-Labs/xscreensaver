@@ -240,6 +240,7 @@
 # include "wayland-dpy.h"
 # include "wayland-idle.h"
 #endif
+#include "gnome-idle.h"
 
 
 #include "xmu.h"
@@ -288,6 +289,8 @@ static int sigchld_received = 0;
 static Bool gfx_stopped_p = False;
 
 Window daemon_window = 0;
+static Window escape_focus_window = 0;
+static Display *escape_focus_dpy = 0;
 Cursor blank_cursor = None;
 Cursor auth_cursor  = None;
 
@@ -349,9 +352,12 @@ kill_all_subprocs (void)
 }
 
 
+static void release_escape_hold (void);
+
 static void
 saver_exit (int status)
 {
+  release_escape_hold();
   kill_all_subprocs();
   exit (status);
 }
@@ -407,6 +413,7 @@ catch_signal (int sig, RETSIGTYPE (*handler) (int))
 static void
 restart_process (void)
 {
+  release_escape_hold();
   kill_all_subprocs();
   execvp (saved_argv [0], saved_argv);	/* shouldn't return */
   {
@@ -1318,6 +1325,75 @@ ungrab_keyboard_and_mouse (Display *dpy)
 }
 
 
+/* The X11 grab does not cover keys delivered to native Wayland windows.
+   A managed window that holds keyboard focus makes the key release enter
+   XWayland, where the grab above absorbs it.  The window is 1x1 and sits
+   under the saver's override-redirect windows. */
+static void
+escape_focus_map (Display *dpy)
+{
+  Window root;
+  XEvent ev;
+  Atom state, skip_taskbar, skip_pager, active;
+  Atom skips[2];
+
+  if (escape_focus_window)
+    return;
+
+  root = RootWindow (dpy, 0);
+  escape_focus_dpy = dpy;
+  escape_focus_window = XCreateSimpleWindow (dpy, root, 0, 0, 1, 1, 0,
+                                              BlackPixel (dpy, 0),
+                                              BlackPixel (dpy, 0));
+  XSelectInput (dpy, escape_focus_window,
+                FocusChangeMask | KeyPressMask | KeyReleaseMask);
+  XStoreName (dpy, escape_focus_window, "XScreenSaver");
+  state = XInternAtom (dpy, "_NET_WM_STATE", False);
+  skip_taskbar = XInternAtom (dpy, "_NET_WM_STATE_SKIP_TASKBAR", False);
+  skip_pager = XInternAtom (dpy, "_NET_WM_STATE_SKIP_PAGER", False);
+  skips[0] = skip_taskbar;
+  skips[1] = skip_pager;
+  XChangeProperty (dpy, escape_focus_window, state, XA_ATOM, 32,
+                   PropModeReplace, (unsigned char *) skips, 2);
+  XMapWindow (dpy, escape_focus_window);
+  XSync (dpy, False);
+
+  memset (&ev, 0, sizeof ev);
+  active = XInternAtom (dpy, "_NET_ACTIVE_WINDOW", False);
+  ev.xclient.type = ClientMessage;
+  ev.xclient.window = escape_focus_window;
+  ev.xclient.message_type = active;
+  ev.xclient.format = 32;
+  ev.xclient.data.l[0] = 2; /* pager: allowed to take focus */
+  ev.xclient.data.l[1] = CurrentTime;
+  XSendEvent (dpy, root, False,
+              SubstructureRedirectMask | SubstructureNotifyMask, &ev);
+  XSetInputFocus (dpy, escape_focus_window, RevertToPointerRoot, CurrentTime);
+  XSync (dpy, False);
+  if (verbose_p)
+    fprintf (stderr, "%s: holding keyboard focus while blanked\n", blurb());
+}
+
+
+static void
+escape_focus_unmap (void)
+{
+  if (!escape_focus_dpy || !escape_focus_window)
+    return;
+  XDestroyWindow (escape_focus_dpy, escape_focus_window);
+  XSync (escape_focus_dpy, False);
+  escape_focus_window = 0;
+}
+
+
+static void
+release_escape_hold (void)
+{
+  gnome_escape_absorb_remove ();
+  escape_focus_unmap ();
+}
+
+
 /* Returns true if it succeeds.
  */
 static Bool
@@ -1522,6 +1598,7 @@ static void
 main_loop (Display *dpy)
 {
   int xi_opcode;
+  int escape_held = 0;
   time_t now = time ((time_t *) 0);
   time_t active_at = now;
   time_t blanked_at = 0;
@@ -1544,6 +1621,8 @@ main_loop (Display *dpy)
   wayland_idle *widle = wayland_idle_init (wdpy,
                                            wayland_activity_cb,
                                            &wayland_active_p);
+  gnome_idle *gidle = NULL;
+  time_t last_gnome_poll = 0;
   if (widle)
     {
       wayland_p = True;   /* Connected to Wayland and can detect activity. */
@@ -1554,14 +1633,23 @@ main_loop (Display *dpy)
          implement neither ext_idle_notifier_v1 nor org_kde_kwin_idle.
          Drop the native idle connection and keep running on XWayland,
          which is what 6.10 and earlier did.  Locking stays disabled
-         because X11 grabs are not secure under Wayland. */
-      fprintf (stderr,
-               "%s: wayland: idle protocols unavailable;"
-               " using X11/XWayland activity detection.\n",
-               blurb());
+         because X11 grabs are not secure under Wayland.
+         On GNOME, also poll Mutter's IdleMonitor: XWayland does not
+         deliver keystrokes typed into native Wayland windows. */
       wayland_dpy_close (wdpy);
       wdpy = NULL;
       wayland_p = True;
+      gidle = gnome_idle_open ();
+      if (gidle)
+        fprintf (stderr,
+                 "%s: wayland: idle protocols unavailable;"
+                 " watching GNOME IdleMonitor for keyboard and pointer activity.\n",
+                 blurb());
+      else
+        fprintf (stderr,
+                 "%s: wayland: idle protocols unavailable;"
+                 " using X11/XWayland activity detection.\n",
+                 blurb());
     }
   else if (getenv ("WAYLAND_DISPLAY") || getenv ("WAYLAND_SOCKET"))
     {
@@ -1583,6 +1671,9 @@ main_loop (Display *dpy)
       exit (1);
     }
 # endif /* !HAVE_WAYLAND */
+
+  /* Drop a binding left behind if the daemon was killed while blanked. */
+  gnome_escape_absorb_remove ();
 
   maybe_disable_locking (dpy, wayland_p);
   init_xscreensaver_atoms (dpy);
@@ -1706,8 +1797,33 @@ main_loop (Display *dpy)
 
         tv.tv_sec = 0;
         tv.tv_usec = 0;
-        if (until > now)
-          tv.tv_sec = until - now;
+        {
+          /* tv_sec == 0 means "block until input" unless a GNOME poll is
+             already due, in which case the zero timeval must be passed. */
+          Bool gnome_poll_due = False;
+
+# ifdef HAVE_WAYLAND
+          /* Mutter's idle time only changes when we ask.  Wake well before
+             the blank timeout so typing in a Wayland window can push the
+             deadline forward. */
+          if (gidle)
+            {
+              int gnome_poll = (current_state == UNBLANKED ? 5 : 1);
+              time_t next = last_gnome_poll + gnome_poll;
+              if (now >= next)
+                gnome_poll_due = True;
+              else if (until <= now || next < until)
+                until = next;
+            }
+# endif /* HAVE_WAYLAND */
+
+          if (!gnome_poll_due && until > now)
+            tv.tv_sec = until - now;
+
+          {
+            struct timeval *wait = NULL;
+            if (gnome_poll_due || tv.tv_sec)
+              wait = &tv;
           
         if (verbose_p > 3)
           {
@@ -1744,7 +1860,9 @@ main_loop (Display *dpy)
             }
 # endif /* HAVE_WAYLAND */
 
-          select (fd + 1, &in_fds, NULL, NULL, (tv.tv_sec ? &tv : NULL));
+          select (fd + 1, &in_fds, NULL, NULL, wait);
+            }
+          }
         }
       }
 
@@ -1794,6 +1912,7 @@ main_loop (Display *dpy)
              the default and re-signal it so that this process actually dies
              with a signal. */
           signal (sig, SIG_DFL);
+          release_escape_hold();
           kill_all_subprocs();
           kill (getpid(), sig);
           abort();
@@ -2164,6 +2283,49 @@ main_loop (Display *dpy)
                          blurb());
             }
         }
+
+      /* GetIdletime is a duration, not a keystroke.  Count it as activity
+         only when input happened during this poll interval.  An idle clock
+         that is merely ticking must not move active_at forward. */
+      if (gidle)
+        {
+          int gnome_poll = (current_state == UNBLANKED ? 5 : 1);
+          if (now >= last_gnome_poll + gnome_poll)
+            {
+              long long ms = gnome_idle_ms (gidle);
+              time_t was = active_at;
+              last_gnome_poll = now;
+              if (ms >= 0)
+                {
+                  time_t idle_sec = (time_t) (ms / 1000);
+                  if (idle_sec <= gnome_poll + 1)
+                    {
+                      time_t candidate = now - idle_sec;
+                      if (candidate > active_at &&
+                          candidate >= ignore_activity_before)
+                        {
+                          active_at = candidate;
+                          active_how = "gnome";
+                        }
+                    }
+                }
+              else if (verbose_p)
+                {
+                  static int logged = 0;
+                  if (!logged)
+                    {
+                      logged = 1;
+                      fprintf (stderr,
+                               "%s: gnome idle monitor query failed\n",
+                               blurb());
+                    }
+                }
+              if (verbose_p && active_at != was && now - was >= 30)
+                fprintf (stderr,
+                         "%s: gnome idle monitor reports user activity\n",
+                         blurb());
+            }
+        }
 # endif /* HAVE_WAYLAND */
 
 
@@ -2237,6 +2399,16 @@ main_loop (Display *dpy)
 
         if (current_state == BLANKED || current_state == LOCKED)
           {
+            /* Wayland still delivers keys to the focused application.
+               Consume Escape, and move keyboard focus into X11 so the
+               matching key release is grabbed too. */
+            if (!escape_held)
+              {
+                gnome_escape_absorb_install ();
+                escape_focus_map (dpy);
+                escape_held = 1;
+              }
+
             /* Grab succeeded and state changed: launch graphics. */
             if (! saver_gfx_pid)
               {
@@ -2321,6 +2493,11 @@ main_loop (Display *dpy)
               }
 
             ungrab_keyboard_and_mouse (dpy);
+            if (escape_held)
+              {
+                release_escape_hold ();
+                escape_held = 0;
+              }
           }
         break;
 

@@ -14,7 +14,7 @@
 "*grabDesktopImages:	True",
 "*grabVideoFrames:	False",
 "*chooseRandomImages:	True",
-"*imageDirectory:	/Library/Desktop Pictures/",
+"*imageDirectory:	/usr/share/backgrounds/",
 "*nice:			10",
 "*memoryLimit:		0",
 "*lock:			False",
@@ -31,7 +31,7 @@
 "*authWarningSlack:	20",
 "*textMode:		url",
 "*textLiteral:		XScreenSaver",
-"*textFile:		",
+"*textFile:		/usr/share/doc/xserver-common/copyright",
 "*textProgram:		fortune",
 "*textURL:		https://en.wikipedia.org/w/index.php?title=Special:NewPages&feed=rss",
 "*demoCommand: xscreensaver-settings",
@@ -40,7 +40,6 @@
 "*manualCommand: xdg-open man:%s || \
 		    x-terminal-emulator -e /bin/sh -c 'man \"%s\"'",
 "*dateFormat:		%I:%M %p, %a %b %e",
-"*newLoginCommand:	no-such-login-manager",
 "XScreenSaver.pointerHysteresis:		10",
 "XScreenSaver.bourneShell:		/bin/sh",
 "*dialogTheme:			default",
@@ -179,7 +178,7 @@
 "*errorColor: #FF0000",
 "*programs:								      \
 				maze --root				    \\n\
-  GL: 				superquadrics --root			    \\n\
+- GL: 				superquadrics --root			    \\n\
 				attraction --root			    \\n\
 				blitspin --root				    \\n\
 				greynetic --root			    \\n\
@@ -206,44 +205,44 @@
 				goop --root				    \\n\
 				grav --root				    \\n\
 				ifs --root				    \\n\
-  GL: 				jigsaw --root				    \\n\
+- GL: 				jigsaw --root				    \\n\
 				julia --root				    \\n\
 -				kaleidescope --root			    \\n\
-  GL: 				moebius --root				    \\n\
+- GL: 				moebius --root				    \\n\
 				moire --root				    \\n\
-  GL: 				morph3d --root				    \\n\
+- GL: 				morph3d --root				    \\n\
 				mountain --root				    \\n\
 				munch --root				    \\n\
 				penrose --root				    \\n\
-  GL: 				pipes --root				    \\n\
+- GL: 				pipes --root				    \\n\
 				rdbomb --root				    \\n\
-  GL: 				rubik --root				    \\n\
+- GL: 				rubik --root				    \\n\
 -				sierpinski --root			    \\n\
 				slip --root				    \\n\
-  GL: 				sproingies --root			    \\n\
+- GL: 				sproingies --root			    \\n\
 				starfish --root				    \\n\
 				strange --root				    \\n\
 				swirl --root				    \\n\
 				triangle --root				    \\n\
 				xjack --root				    \\n\
 				xlyap --root				    \\n\
-  GL: 				atlantis --root				    \\n\
+- GL: 				atlantis --root				    \\n\
 				bsod --root				    \\n\
-  GL: 				bubble3d --root				    \\n\
-  GL: 				cage --root				    \\n\
+- GL: 				bubble3d --root				    \\n\
+- GL: 				cage --root				    \\n\
 -				crystal --root				    \\n\
 				cynosure --root				    \\n\
 				discrete --root				    \\n\
 				distort --root				    \\n\
 				epicycle --root				    \\n\
 				flow --root				    \\n\
-  GL: 				glplanet --root				    \\n\
+- GL: 				glplanet --root				    \\n\
 				interference --root			    \\n\
 				kumppa --root				    \\n\
-  GL: 				lament --root				    \\n\
+- GL: 				lament --root				    \\n\
 				moire2 --root				    \\n\
-  GL: 				sonar --root				    \\n\
-  GL: 				stairs --root				    \\n\
+- GL: 				sonar --root				    \\n\
+- GL: 				stairs --root				    \\n\
 				truchet --root				    \\n\
 -				vidwhacker --root			    \\n\
 -				webcollage --root			    \\n\
@@ -258,79 +257,79 @@
 				penetrate --root			    \\n\
 				petri --root				    \\n\
 				phosphor --root				    \\n\
-  GL: 				pulsar --root				    \\n\
+- GL: 				pulsar --root				    \\n\
 				ripples --root				    \\n\
 				shadebobs --root			    \\n\
-  GL: 				sierpinski3d --root			    \\n\
+- GL: 				sierpinski3d --root			    \\n\
 				spotlight --root			    \\n\
 				squiral --root				    \\n\
 				wander --root				    \\n\
 				xflame --root				    \\n\
 				xmatrix --root				    \\n\
-  GL: 				gflux --root				    \\n\
+- GL: 				gflux --root				    \\n\
 -				nerverot --root				    \\n\
 				xrayswarm --root			    \\n\
 				xspirograph --root			    \\n\
-  GL: 				circuit --root				    \\n\
-  GL: 				dangerball --root			    \\n\
+- GL: 				circuit --root				    \\n\
+- GL: 				dangerball --root			    \\n\
 - GL: 				dnalogo --root				    \\n\
-  GL: 				engine --root				    \\n\
-  GL: 				flipscreen3d --root			    \\n\
-  GL: 				gltext --root				    \\n\
-  GL: 				menger --root				    \\n\
-  GL: 				molecule --root				    \\n\
+- GL: 				engine --root				    \\n\
+- GL: 				flipscreen3d --root			    \\n\
+- GL: 				gltext --root				    \\n\
+- GL: 				menger --root				    \\n\
+- GL: 				molecule --root				    \\n\
 				rotzoomer --root			    \\n\
 				scooter --root				    \\n\
 				speedmine --root			    \\n\
-  GL: 				starwars --root				    \\n\
-  GL: 				stonerview --root			    \\n\
+- GL: 				starwars --root				    \\n\
+- GL: 				stonerview --root			    \\n\
 				vermiculate --root			    \\n\
 				whirlwindwarp --root			    \\n\
 				zoom --root				    \\n\
 				anemone --root				    \\n\
 				apollonian --root			    \\n\
-  GL: 				boxed --root				    \\n\
-  GL: 				cubenetic --root			    \\n\
-  GL: 				endgame --root				    \\n\
+- GL: 				boxed --root				    \\n\
+- GL: 				cubenetic --root			    \\n\
+- GL: 				endgame --root				    \\n\
 				euler2d --root				    \\n\
 				fluidballs --root			    \\n\
-  GL: 				flurry --root				    \\n\
+- GL: 				flurry --root				    \\n\
 - GL: 				glblur --root				    \\n\
-  GL: 				glsnake --root				    \\n\
+- GL: 				glsnake --root				    \\n\
 				halftone --root				    \\n\
-  GL: 				juggler3d --root			    \\n\
-  GL: 				lavalite --root				    \\n\
+- GL: 				juggler3d --root			    \\n\
+- GL: 				lavalite --root				    \\n\
 -				polyominoes --root			    \\n\
-  GL: 				queens --root				    \\n\
+- GL: 				queens --root				    \\n\
 - GL: 				sballs --root				    \\n\
-  GL: 				spheremonics --root			    \\n\
+- GL: 				spheremonics --root			    \\n\
 				twang --root				    \\n\
 - GL: 				antspotlight --root			    \\n\
 				apple2 --root				    \\n\
-  GL: 				atunnel --root				    \\n\
+- GL: 				atunnel --root				    \\n\
 				barcode --root				    \\n\
-  GL: 				blinkbox --root				    \\n\
-  GL: 				blocktube --root			    \\n\
-  GL: 				bouncingcow --root			    \\n\
+- GL: 				blinkbox --root				    \\n\
+- GL: 				blocktube --root			    \\n\
+- GL: 				bouncingcow --root			    \\n\
 				cloudlife --root			    \\n\
-  GL: 				cubestorm --root			    \\n\
+- GL: 				cubestorm --root			    \\n\
 				eruption --root				    \\n\
-  GL: 				flipflop --root				    \\n\
-  GL: 				flyingtoasters --root			    \\n\
+- GL: 				flipflop --root				    \\n\
+- GL: 				flyingtoasters --root			    \\n\
 				fontglide --root			    \\n\
-  GL: 				gleidescope --root			    \\n\
-  GL: 				glknots --root				    \\n\
-  GL: 				glmatrix --root				    \\n\
+- GL: 				gleidescope --root			    \\n\
+- GL: 				glknots --root				    \\n\
+- GL: 				glmatrix --root				    \\n\
 - GL: 				glslideshow --root			    \\n\
-  GL: 				hypertorus --root			    \\n\
+- GL: 				hypertorus --root			    \\n\
 - GL: 				jigglypuff --root			    \\n\
 				metaballs --root			    \\n\
-  GL: 				mirrorblob --root			    \\n\
+- GL: 				mirrorblob --root			    \\n\
 				piecewise --root			    \\n\
-  GL: 				polytopes --root			    \\n\
+- GL: 				polytopes --root			    \\n\
 				pong --root				    \\n\
 				popsquares --root			    \\n\
-  GL: 				surfaces --root				    \\n\
+- GL: 				surfaces --root				    \\n\
 				xanalogtv --root			    \\n\
 				abstractile --root			    \\n\
 				anemotaxis --root			    \\n\
@@ -340,137 +339,137 @@
 				interaggregate --root			    \\n\
 				intermomentary --root			    \\n\
 				memscroller --root			    \\n\
-  GL: 				noof --root				    \\n\
+- GL: 				noof --root				    \\n\
 				pacman --root				    \\n\
-  GL: 				pinion --root				    \\n\
-  GL: 				polyhedra --root			    \\n\
+- GL: 				pinion --root				    \\n\
+- GL: 				polyhedra --root			    \\n\
 - GL: 				providence --root			    \\n\
 				substrate --root			    \\n\
 				wormhole --root				    \\n\
 - GL: 				antmaze --root				    \\n\
-  GL: 				boing --root				    \\n\
+- GL: 				boing --root				    \\n\
 				boxfit --root				    \\n\
-  GL: 				carousel --root				    \\n\
+- GL: 				carousel --root				    \\n\
 				celtic --root				    \\n\
-  GL: 				crackberg --root			    \\n\
-  GL: 				cube21 --root				    \\n\
+- GL: 				crackberg --root			    \\n\
+- GL: 				cube21 --root				    \\n\
 				fiberlamp --root			    \\n\
-  GL: 				fliptext --root				    \\n\
-  GL: 				glhanoi --root				    \\n\
-  GL: 				tangram --root				    \\n\
-  GL: 				timetunnel --root			    \\n\
-  GL: 				glschool --root				    \\n\
-  GL: 				topblock --root				    \\n\
-  GL: 				cubicgrid --root			    \\n\
+- GL: 				fliptext --root				    \\n\
+- GL: 				glhanoi --root				    \\n\
+- GL: 				tangram --root				    \\n\
+- GL: 				timetunnel --root			    \\n\
+- GL: 				glschool --root				    \\n\
+- GL: 				topblock --root				    \\n\
+- GL: 				cubicgrid --root			    \\n\
 				cwaves --root				    \\n\
-  GL: 				gears --root				    \\n\
-  GL: 				glcells --root				    \\n\
-  GL: 				lockward --root				    \\n\
+- GL: 				gears --root				    \\n\
+- GL: 				glcells --root				    \\n\
+- GL: 				lockward --root				    \\n\
 				m6502 --root				    \\n\
-  GL: 				moebiusgears --root			    \\n\
-  GL: 				voronoi --root				    \\n\
-  GL: 				hypnowheel --root			    \\n\
-  GL: 				klein --root				    \\n\
+- GL: 				moebiusgears --root			    \\n\
+- GL: 				voronoi --root				    \\n\
+- GL: 				hypnowheel --root			    \\n\
+- GL: 				klein --root				    \\n\
 -				lcdscrub --root				    \\n\
-  GL: 				photopile --root			    \\n\
-  GL: 				skytentacles --root			    \\n\
-  GL: 				rubikblocks --root			    \\n\
-  GL: 				companioncube --root			    \\n\
-  GL: 				hilbert --root				    \\n\
-  GL: 				tronbit --root				    \\n\
-  GL: 				geodesic --root				    \\n\
+- GL: 				photopile --root			    \\n\
+- GL: 				skytentacles --root			    \\n\
+- GL: 				rubikblocks --root			    \\n\
+- GL: 				companioncube --root			    \\n\
+- GL: 				hilbert --root				    \\n\
+- GL: 				tronbit --root				    \\n\
+- GL: 				geodesic --root				    \\n\
 				hexadrop --root				    \\n\
-  GL: 				kaleidocycle --root			    \\n\
-  GL: 				quasicrystal --root			    \\n\
-  GL: 				starnest --root				    \\n\
-  GL: 				unknownpleasures --root			    \\n\
-  GL: 				alienbeacon --root			    \\n\
+- GL: 				kaleidocycle --root			    \\n\
+- GL: 				quasicrystal --root			    \\n\
+- GL: 				starnest --root				    \\n\
+- GL: 				unknownpleasures --root			    \\n\
+- GL: 				alienbeacon --root			    \\n\
 				binaryring --root			    \\n\
-  GL: 				cityflow --root				    \\n\
-  GL: 				geodesicgears --root			    \\n\
-  GL: 				projectiveplane --root			    \\n\
-  GL: 				romanboy --root				    \\n\
+- GL: 				cityflow --root				    \\n\
+- GL: 				geodesicgears --root			    \\n\
+- GL: 				projectiveplane --root			    \\n\
+- GL: 				romanboy --root				    \\n\
 				tessellimage --root			    \\n\
-  GL: 				topologica --root			    \\n\
-  GL: 				winduprobot --root			    \\n\
-  GL: 				fluxcore --root				    \\n\
-  GL: 				gimbalharmonics --root			    \\n\
-  GL: 				protophore --root			    \\n\
-  GL: 				skyline --root				    \\n\
-  GL: 				splitflap --root			    \\n\
-  GL: 				cubestack --root			    \\n\
-  GL: 				cubetwist --root			    \\n\
-  GL: 				discoball --root			    \\n\
-  GL: 				driftclouds --root			    \\n\
-  GL: 				dymaxionmap --root			    \\n\
-  GL: 				elementalring --root			    \\n\
-  GL: 				energystream --root			    \\n\
-  GL: 				hexstrut --root				    \\n\
-  GL: 				hydrostat --root			    \\n\
-  GL: 				raverhoop --root			    \\n\
-  GL: 				splodesic --root			    \\n\
-  GL: 				unicrud --root				    \\n\
-  GL: 				esper --root				    \\n\
-  GL: 				prococean --root			    \\n\
-  GL: 				vigilance --root			    \\n\
-  GL: 				crumbler --root				    \\n\
+- GL: 				topologica --root			    \\n\
+- GL: 				winduprobot --root			    \\n\
+- GL: 				fluxcore --root				    \\n\
+- GL: 				gimbalharmonics --root			    \\n\
+- GL: 				protophore --root			    \\n\
+- GL: 				skyline --root				    \\n\
+- GL: 				splitflap --root			    \\n\
+- GL: 				cubestack --root			    \\n\
+- GL: 				cubetwist --root			    \\n\
+- GL: 				discoball --root			    \\n\
+- GL: 				driftclouds --root			    \\n\
+- GL: 				dymaxionmap --root			    \\n\
+- GL: 				elementalring --root			    \\n\
+- GL: 				energystream --root			    \\n\
+- GL: 				hexstrut --root				    \\n\
+- GL: 				hydrostat --root			    \\n\
+- GL: 				raverhoop --root			    \\n\
+- GL: 				splodesic --root			    \\n\
+- GL: 				unicrud --root				    \\n\
+- GL: 				esper --root				    \\n\
+- GL: 				prococean --root			    \\n\
+- GL: 				vigilance --root			    \\n\
+- GL: 				crumbler --root				    \\n\
 				filmleader --root			    \\n\
 				glitchpeg --root			    \\n\
-  GL: 				handsy --root				    \\n\
-  GL: 				maze3d --root				    \\n\
-  GL: 				peepers --root				    \\n\
-  GL: 				polarnight --root			    \\n\
-  GL: 				razzledazzle --root			    \\n\
+- GL: 				handsy --root				    \\n\
+- GL: 				maze3d --root				    \\n\
+- GL: 				peepers --root				    \\n\
+- GL: 				polarnight --root			    \\n\
+- GL: 				razzledazzle --root			    \\n\
 				vfeedback --root			    \\n\
-  GL: 				deepstars --root			    \\n\
-  GL: 				gravitywell --root			    \\n\
-  GL: 				synthwavecity --root			    \\n\
-  GL: 				batteredplanet --root			    \\n\
-  GL: 				beats --root				    \\n\
-  GL: 				covid19 --root				    \\n\
-  GL: 				etruscanvenus --root			    \\n\
-  GL: 				gibson --root				    \\n\
-  GL: 				headroom --root				    \\n\
-  GL: 				sphereeversion --root			    \\n\
+- GL: 				deepstars --root			    \\n\
+- GL: 				gravitywell --root			    \\n\
+- GL: 				synthwavecity --root			    \\n\
+- GL: 				batteredplanet --root			    \\n\
+- GL: 				beats --root				    \\n\
+- GL: 				covid19 --root				    \\n\
+- GL: 				etruscanvenus --root			    \\n\
+- GL: 				gibson --root				    \\n\
+- GL: 				headroom --root				    \\n\
+- GL: 				sphereeversion --root			    \\n\
 				binaryhorizon --root			    \\n\
-  GL: 				goldenapollian --root			    \\n\
+- GL: 				goldenapollian --root			    \\n\
 				marbling --root				    \\n\
-  GL: 				neontriangulator --root			    \\n\
-  GL: 				stripeytorus --root			    \\n\
-  GL: 				chompytower --root			    \\n\
-  GL: 				hextrail --root				    \\n\
-  GL: 				mapscroller --root			    \\n\
-  GL: 				nakagin --root				    \\n\
-  GL: 				squirtorus --root			    \\n\
-  GL: 				stardome --root				    \\n\
-  GL: 				cubocteversion --root			    \\n\
+- GL: 				neontriangulator --root			    \\n\
+- GL: 				stripeytorus --root			    \\n\
+- GL: 				chompytower --root			    \\n\
+- GL: 				hextrail --root				    \\n\
+- GL: 				mapscroller --root			    \\n\
+- GL: 				nakagin --root				    \\n\
+- GL: 				squirtorus --root			    \\n\
+- GL: 				stardome --root				    \\n\
+- GL: 				cubocteversion --root			    \\n\
 				droste --root				    \\n\
-  GL: 				logarithmiccircles --root		    \\n\
-  GL: 				neongravity --root			    \\n\
-  GL: 				papercube --root			    \\n\
-  GL: 				skulloop --root				    \\n\
-  GL: 				trainmandala --root			    \\n\
-  GL: 				highvoltage --root			    \\n\
-  GL: 				kallisti --root				    \\n\
-  GL: 				klondike --root				    \\n\
-  GL: 				selfreflect --root			    \\n\
-  GL: 				truchetzoom --root			    \\n\
-  GL: 				bestill --root				    \\n\
-  GL: 				bubblecolors --root			    \\n\
-  GL: 				darktransit --root			    \\n\
-  GL: 				downfall --root				    \\n\
-  GL: 				dumpsterfire --root			    \\n\
-  GL: 				hexplasma --root			    \\n\
-  GL: 				hopffibration --root			    \\n\
-  GL: 				noxfire --root				    \\n\
-  GL: 				platonicfolding --root			    \\n\
-  GL: 				rigrekt --root				    \\n\
-  GL: 				trizm --root				    \\n\
-  GL: 				universeball --root			    \\n\
-  GL: 				amigajuggler --root			    \\n\
-  GL: 				floppy --root				    \\n\
-  GL: 				graphstat --root			    \\n\
-  GL: 				worldpieces --root			    \\n",
+- GL: 				logarithmiccircles --root		    \\n\
+- GL: 				neongravity --root			    \\n\
+- GL: 				papercube --root			    \\n\
+- GL: 				skulloop --root				    \\n\
+- GL: 				trainmandala --root			    \\n\
+- GL: 				highvoltage --root			    \\n\
+- GL: 				kallisti --root				    \\n\
+- GL: 				klondike --root				    \\n\
+- GL: 				selfreflect --root			    \\n\
+- GL: 				truchetzoom --root			    \\n\
+- GL: 				bestill --root				    \\n\
+- GL: 				bubblecolors --root			    \\n\
+- GL: 				darktransit --root			    \\n\
+- GL: 				downfall --root				    \\n\
+- GL: 				dumpsterfire --root			    \\n\
+- GL: 				hexplasma --root			    \\n\
+- GL: 				hopffibration --root			    \\n\
+- GL: 				noxfire --root				    \\n\
+- GL: 				platonicfolding --root			    \\n\
+- GL: 				rigrekt --root				    \\n\
+- GL: 				trizm --root				    \\n\
+- GL: 				universeball --root			    \\n\
+- GL: 				amigajuggler --root			    \\n\
+- GL: 				floppy --root				    \\n\
+- GL: 				graphstat --root			    \\n\
+- GL: 				worldpieces --root			    \\n",
 "*hacks.alienbeacon.name:    Alien Beacon",
 "*hacks.amigajuggler.name:   Amiga Juggler",
 "*hacks.antinspect.name:     Ant Inspect",
